@@ -2,7 +2,7 @@
 
 For this assignment we will implement a generic thread pool, which we will then use to traverse a graph and compute the sum of the elements contained by the nodes.
 You will be provided with a serial implementation of the graph traversal and with most of the data structures needed to implement the thread pool.
-Your job is to write the thread pool rutines and then use the thread pool to traverse the graph.
+Your job is to write the thread pool routines and then use the thread pool to traverse the graph.
 
 ## Thread Pool Description
 
@@ -10,7 +10,7 @@ A thread pool contains a given number of active threads that simply wait to be g
 The threads are created when the thread pool is created they poll a task queue until a task is available.
 Once a tasks are put in the task queue, the threads start running the task.
 A thread pool creates N threads when the thread pool is created and does not destroy (join) them through out the life time of the thread pool.
-That way, the penalty of creating and destroying threads ad hoc is avoided.
+That way, the penalty of creating and destroying threads ad-hoc is avoided.
 As such, you must implement the following functions (marked with `TODO` in the provided skeleton):
 
 - `task_create` : creates an `os_task_t` that will be put in the task queue - a task consists of a function pointer and an argument.
@@ -25,7 +25,7 @@ Any function can be registered in the task queue.
 
 ## Graph Traversal
 
-Once you have implemented the thread pool, you need to test it by using it for computing the sum of all the nodesof a graph.
+Once you have implemented the thread pool, you need to test it by using it for computing the sum of all the nodes of a graph.
 A serial implementation for this algorithm is provided in `skep/serial.c`
 To make use of the thread pool, you will need to create tasks that will be put in the task queue.
 A task consists of 2 steps:
@@ -40,11 +40,11 @@ This condition should be implemented in a function that is passed to `threadpool
 ## Synchronization
 
 For synchronization you can use mutexes, semaphores, spinlocks, condition variables - anything that grinds your gear.
-However, you are not allowed to use hacks such as `sleep`, `printf` synchronization or adding superflous computation.
+However, you are not allowed to use hacks such as `sleep`, `printf` synchronization or adding superfluous computation.
 
 ## Input Files
 
-Reading the graphs from the input files is being taken care of the functions implemetend in `src/os_graph.c`.
+Reading the graphs from the input files is being taken care of the functions implemented in `src/os_graph.c`.
 A graph is represented in input files as follows:
 
 - first line contains 2 integers N and M: N - number of nodes, M - numbed or edges
@@ -87,7 +87,7 @@ That will create the `serial` and `parallel` binaries/
 Input tests cases are located in `tests/in/`.
 The parallel and the serial version should provide the same results for the same input test case.
 
-If you want manually run a single test, run, whil in the `src/` directory:
+If you want manually run a single test, use commands such as below while in the `src/` directory:
 
 ```console
 $./parallel ../tests/in/test5.in
