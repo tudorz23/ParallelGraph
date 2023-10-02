@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: BSD-3-Clause
+
 """
 Checker for the "Parallel Graph" assignment.
 
@@ -11,6 +13,7 @@ import subprocess
 TOTAL = 0.0
 
 src = os.environ.get("SRC_PATH", "../src")
+
 
 def check(testname):
     """Check a test file.

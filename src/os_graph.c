@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-/*             [ ==== NODE FUNCTIONS === ]               */
+/* Node functions */
 os_node_t *os_create_node(unsigned int _nodeID, int _nodeInfo)
 {
 	os_node_t *newNode;
@@ -17,7 +17,7 @@ os_node_t *os_create_node(unsigned int _nodeID, int _nodeInfo)
 	return newNode;
 }
 
-/*             [ ==== GRAPH FUNCTIONS === ]              */
+/* Graph functions */
 os_graph_t *create_graph_from_data(unsigned int nc, unsigned int ec,
 		int *values, os_edge_t *edges)
 {
@@ -39,9 +39,7 @@ os_graph_t *create_graph_from_data(unsigned int nc, unsigned int ec,
 
 	for (i = 0; i < ec; ++i) {
 		isrc = edges[i].src; idst = edges[i].dst;
-
 		graph->nodes[isrc]->neighbours[graph->nodes[isrc]->cNeighbours++] = idst;
-
 		graph->nodes[idst]->neighbours[graph->nodes[idst]->cNeighbours++] = isrc;
 	}
 
@@ -56,18 +54,18 @@ os_graph_t *create_graph_from_file(FILE *file)
 	int i;
 	int *values;
 	os_edge_t *edges;
-	os_graph_t *graph;
+	os_graph_t *graph = NULL;
 
 	if (fscanf(file, "%d %d", &nCount, &eCount) == 0) {
 		fprintf(stderr, "[ERROR] Can't read from file\n");
-		return NULL;
+		goto out;
 	}
 
 	values = malloc(nCount * sizeof(int));
 	for (i = 0; i < nCount; ++i) {
 		if (fscanf(file, "%d", &values[i]) == 0) {
 			fprintf(stderr, "[ERROR] Can't read from file\n");
-			return NULL;
+			goto free_values;
 		}
 	}
 
@@ -75,11 +73,17 @@ os_graph_t *create_graph_from_file(FILE *file)
 	for (i = 0; i < eCount; ++i) {
 		if (fscanf(file, "%d %d", &edges[i].src, &edges[i].dst) == 0) {
 			fprintf(stderr, "[ERROR] Can't read from file\n");
-			return NULL;
+			goto free_edges;
 		}
 	}
 
 	graph = create_graph_from_data(nCount, eCount, values, edges);
+
+free_edges:
+	free(edges);
+free_values:
+	free(values);
+out:
 	return graph;
 }
 

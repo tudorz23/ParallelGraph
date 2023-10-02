@@ -10,15 +10,15 @@ A thread pool contains a given number of active threads that simply wait to be g
 The threads are created when the thread pool is created they poll a task queue until a task is available.
 Once a tasks are put in the task queue, the threads start running the task.
 A thread pool creates N threads when the thread pool is created and does not destroy (join) them through out the life time of the thread pool.
-That way, the penalty of creating and destroying threads ad-hoc is avoided.
+That way, the penalty of creating and destroying threads ad hoc is avoided.
 As such, you must implement the following functions (marked with `TODO` in the provided skeleton):
 
-- `task_create` : creates an `os_task_t` that will be put in the task queue - a task consists of a function pointer and an argument.
-- `add_task_in_queue` : adds a given task in the thread pool's task queue.
-- `get_task` : get a task from the thread pool's task queue.
-- `threadpool_create` : allocate and initialize a new thread pool.
-- `thread_loop_function` : all the threads in the thread pool will execute this function - they all wait until a task is available in the task queue; once they grab a task they simply invoke the function that was provided to `task_create`.
-- `threadpool_stop` : stop all the threads from execution.
+- `task_create`: creates an `os_task_t` that will be put in the task queue - a task consists of a function pointer and an argument.
+- `add_task_in_queue`: adds a given task in the thread pool's task queue.
+- `get_task`: get a task from the thread pool's task queue.
+- `threadpool_create`: allocate and initialize a new thread pool.
+- `thread_loop_function`: all the threads in the thread pool will execute this function - they all wait until a task is available in the task queue; once they grab a task they simply invoke the function that was provided to `task_create`.
+- `threadpool_stop`: stop all the threads from execution.
 
 Notice that the thread pool is completely independent from any given application.
 Any function can be registered in the task queue.
@@ -77,7 +77,7 @@ However, you can create other data structures that leverage these ones.
 To compile both the serial and the parallel version, enter the `src/` directory and run:
 
 ```console
-$ make
+make
 ```
 
 That will create the `serial` and `parallel` binaries/
@@ -134,7 +134,7 @@ It's recommended that you use the [local Docker-based checker](./README.checker.
 You would use the command:
 
 ```console
-$ ./local.sh checker
+./local.sh checker
 ```
 
 to run the checker in a Docker-based environment that is identical to the one used for the official assignment evaluation.

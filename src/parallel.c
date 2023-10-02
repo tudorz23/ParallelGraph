@@ -34,10 +34,10 @@ int main(int argc, char *argv[])
 	graph = create_graph_from_file(input_file);
 	if (graph == NULL) {
 		fprintf(stderr, "[Error] Can't read the graph from file\n");
-		return -1;
+		exit(EXIT_FAILURE);
 	}
 
-	// TODO: create thread pool and traverse the graf
+	/* TODO: Create thread pool and traverse the graph. */
 
 	printf("%d", sum);
 

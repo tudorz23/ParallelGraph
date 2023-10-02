@@ -27,7 +27,7 @@ void queue_add(os_queue_t *queue, void *info)
 
 	newNode = malloc(sizeof(os_list_node_t));
 	if (newNode == NULL) {
-		perror("malloc");
+		fprintf(stderr, "[ERROR] %s: Not enough memory\n", __func__);
 		return;
 	}
 

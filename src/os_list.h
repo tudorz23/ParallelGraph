@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: BSD-3-Clause
+/* SPDX-License-Identifier: BSD-3-Clause */
 
 #ifndef __OS_LIST_H__
 #define __OS_LIST_H__	1
