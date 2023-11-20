@@ -8,13 +8,22 @@
 
 #include "os_graph.h"
 #include "os_threadpool.h"
-#include "os_list.h"
+#include "log/log.h"
+#include "utils.h"
 
-#define MAX_TASK 100
-#define MAX_THREAD 4
+#define NUM_THREADS		4
 
 static int sum;
 static os_graph_t *graph;
+static os_threadpool_t *tp;
+/* TODO: Define graph synchronization mechanisms. */
+
+/* TODO: Define graph task argument. */
+
+static void process_node(unsigned int idx)
+{
+	/* TODO: Implement thread-pool based processing of graph. */
+}
 
 int main(int argc, char *argv[])
 {
@@ -26,18 +35,15 @@ int main(int argc, char *argv[])
 	}
 
 	input_file = fopen(argv[1], "r");
-	if (input_file == NULL) {
-		perror("fopen");
-		exit(EXIT_FAILURE);
-	}
+	DIE(input_file == NULL, "fopen");
 
 	graph = create_graph_from_file(input_file);
-	if (graph == NULL) {
-		fprintf(stderr, "[Error] Can't read the graph from file\n");
-		exit(EXIT_FAILURE);
-	}
 
-	/* TODO: Create thread pool and traverse the graph. */
+	/* TODO: Initialize graph synchronization mechanisms. */
+	tp = create_threadpool(NUM_THREADS);
+	process_node(0);
+	wait_for_completion(tp);
+	destroy_threadpool(tp);
 
 	printf("%d", sum);
 

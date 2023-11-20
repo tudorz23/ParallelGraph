@@ -2,32 +2,25 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+
 #include "os_graph.h"
+#include "log/log.h"
+#include "utils.h"
 
 static int sum;
 static os_graph_t *graph;
 
-static void processNode(unsigned int nodeIdx)
+static void process_node(unsigned int idx)
 {
 	os_node_t *node;
 
-	node = graph->nodes[nodeIdx];
-	sum += node->nodeInfo;
-	for (int i = 0; i < node->cNeighbours; i++)
-		if (graph->visited[node->neighbours[i]] == 0) {
-			graph->visited[node->neighbours[i]] = 1;
-			processNode(node->neighbours[i]);
-		}
-}
+	node = graph->nodes[idx];
+	sum += node->info;
+	graph->visited[idx] = DONE;
 
-static void traverse_graph(void)
-{
-	for (int i = 0; i < graph->nCount; i++) {
-		if (graph->visited[i] == 0) {
-			graph->visited[i] = 1;
-			processNode(i);
-		}
-	}
+	for (unsigned int i = 0; i < node->num_neighbours; i++)
+		if (graph->visited[node->neighbours[i]] == NOT_VISITED)
+			process_node(node->neighbours[i]);
 }
 
 int main(int argc, char *argv[])
@@ -40,18 +33,12 @@ int main(int argc, char *argv[])
 	}
 
 	input_file = fopen(argv[1], "r");
-	if (input_file == NULL) {
-		perror("fopen");
-		exit(EXIT_FAILURE);
-	}
+	DIE(input_file == NULL, "fopen");
 
 	graph = create_graph_from_file(input_file);
-	if (graph == NULL) {
-		fprintf(stderr, "[Error] Can't read the graph from file\n");
-		exit(EXIT_FAILURE);
-	}
 
-	traverse_graph();
+	process_node(0);
+
 	printf("%d", sum);
 
 	return 0;

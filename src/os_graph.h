@@ -6,29 +6,33 @@
 #include <stdio.h>
 
 typedef struct os_node_t {
-	unsigned int nodeID;
-	signed int nodeInfo;
+	unsigned int id;
+	int info;
 
-	unsigned int cNeighbours;   // Neighbours count
+	unsigned int num_neighbours;
 	unsigned int *neighbours;
 } os_node_t;
 
 typedef struct os_graph_t {
-	unsigned int nCount;        // Nodes count
-	unsigned int eCount;        // Edges count
+	unsigned int num_nodes;
+	unsigned int num_edges;
 
 	os_node_t **nodes;
-	unsigned int *visited;
+	enum {
+		NOT_VISITED = 0,
+		PROCESSING = 1,
+		DONE = 2
+	} *visited;
 } os_graph_t;
 
 typedef struct os_edge_t {
-	int src, dst;
+	unsigned int src, dst;
 } os_edge_t;
 
-os_node_t *os_create_node(unsigned int _nodeID, int _nodeInfo);
-os_graph_t *create_graph_from_data(unsigned int nc, unsigned int ec,
+os_node_t *os_create_node(unsigned int id, int info);
+os_graph_t *create_graph_from_data(unsigned int num_nodes, unsigned int num_edges,
 		int *values, os_edge_t *edges);
 os_graph_t *create_graph_from_file(FILE *file);
-void printGraph(os_graph_t *graph);
+void print_graph(os_graph_t *graph);
 
 #endif

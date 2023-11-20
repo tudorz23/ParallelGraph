@@ -7,39 +7,39 @@
 
 os_queue_t *queue_create(void)
 {
-	os_queue_t *newQueue;
+	os_queue_t *queue;
 
-	newQueue = malloc(sizeof(os_queue_t));
-	if (newQueue == NULL) {
+	queue = malloc(sizeof(*queue));
+	if (queue == NULL) {
 		perror("malloc");
 		return NULL;
 	}
-	pthread_mutex_init(&newQueue->lock, NULL);
-	newQueue->first =  NULL;
-	newQueue->last = NULL;
+	pthread_mutex_init(&queue->lock, NULL);
+	queue->first =  NULL;
+	queue->last = NULL;
 
-	return newQueue;
+	return queue;
 }
 
 void queue_add(os_queue_t *queue, void *info)
 {
-	os_list_node_t *newNode;
+	os_list_node_t *node;
 
-	newNode = malloc(sizeof(os_list_node_t));
-	if (newNode == NULL) {
+	node = malloc(sizeof(*node));
+	if (node == NULL) {
 		fprintf(stderr, "[ERROR] %s: Not enough memory\n", __func__);
 		return;
 	}
 
-	newNode->next = NULL;
-	newNode->info = info;
+	node->next = NULL;
+	node->info = info;
 
 	if (queue->last == NULL && queue->first == NULL) {
-		queue->first = newNode;
-		queue->last = newNode;
+		queue->first = node;
+		queue->last = node;
 	} else {
-		queue->last->next = newNode;
-		queue->last = newNode;
+		queue->last->next = node;
+		queue->last = node;
 	}
 }
 
