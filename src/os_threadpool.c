@@ -43,6 +43,10 @@ void enqueue_task(os_threadpool_t *tp, os_task_t *t)
 
 	list_add(&tp->head, &t->list);
 
+	pthread_mutex_lock(&tp->enum_mutex);
+	tp->state = IN_PROGRESS;
+	pthread_mutex_unlock(&tp->enum_mutex);
+
 	pthread_cond_signal(&tp->waiting_cond);
 	pthread_mutex_unlock(&tp->queue_mutex);
 }
@@ -62,25 +66,42 @@ static int queue_is_empty(os_threadpool_t *tp)
  * Return NULL if work is complete, i.e. no task will become available,
  * i.e. all threads are going to block.
  */
-
 os_task_t *dequeue_task(os_threadpool_t *tp)
 {
 	os_task_t *t;
 
 	/* TODO: Dequeue task from the shared task queue. Use synchronization. */
+	pthread_mutex_lock(&tp->enum_mutex);
 	if (tp->state == FINISHED) {
+		pthread_mutex_lock(&tp->blocked_thread_mutex);
+		(tp->blocked_thread_cnt)++;
+		pthread_mutex_unlock(&tp->blocked_thread_mutex);
+
+		pthread_mutex_unlock(&tp->enum_mutex);
 		return NULL;
 	}
+	pthread_mutex_unlock(&tp->enum_mutex);
+
 
 	pthread_mutex_lock(&tp->queue_mutex);
 	while (queue_is_empty(tp)) {
+		pthread_mutex_lock(&tp->enum_mutex);
 		if (tp->state == FINISHED) {
+
+			pthread_mutex_lock(&tp->blocked_thread_mutex);
+			(tp->blocked_thread_cnt)++;
+			pthread_mutex_unlock(&tp->blocked_thread_mutex);
+
+			pthread_mutex_unlock(&tp->enum_mutex);
 			pthread_mutex_unlock(&tp->queue_mutex);
 			return NULL;
 		}
+		pthread_mutex_unlock(&tp->enum_mutex);
+
 
 		pthread_mutex_lock(&tp->blocked_thread_mutex);
 		(tp->blocked_thread_cnt)++;
+		pthread_cond_signal(&tp->check_finish_cond);
 		pthread_mutex_unlock(&tp->blocked_thread_mutex);
 
 		pthread_cond_wait(&tp->waiting_cond, &tp->queue_mutex); // Here they wait.
@@ -94,7 +115,6 @@ os_task_t *dequeue_task(os_threadpool_t *tp)
 	list_del(tp->head.prev);
 
 	pthread_mutex_unlock(&tp->queue_mutex);
-	pthread_cond_signal(&tp->empty_queue_cond);
 
 	return t;
 }
@@ -122,13 +142,25 @@ void wait_for_completion(os_threadpool_t *tp)
 {
 	/* TODO: Wait for all worker threads. Use synchronization. */
 	pthread_mutex_lock(&tp->blocked_thread_mutex);
-	while (!queue_is_empty(tp) || tp->blocked_thread_cnt != tp->num_threads) {
-		pthread_cond_wait(&tp->empty_queue_cond, &tp->blocked_thread_mutex);
+	while (tp->blocked_thread_cnt < tp->num_threads || tp->state == INITIALIZED) {
+		printf("BLock thread cnt is (%d)\n", tp->blocked_thread_cnt);
+		pthread_cond_wait(&tp->check_finish_cond, &tp->blocked_thread_mutex);
 	}
 	pthread_mutex_unlock(&tp->blocked_thread_mutex);
 
+
+	pthread_mutex_lock(&tp->enum_mutex);
 	tp->state = FINISHED;
 	pthread_cond_broadcast(&tp->waiting_cond);
+	pthread_mutex_unlock(&tp->enum_mutex);
+
+
+	// DEBUG START
+	pthread_mutex_lock(&tp->blocked_thread_mutex);
+	printf("Cnt block after finish is (%d)\n", tp->blocked_thread_cnt);
+	pthread_mutex_unlock(&tp->blocked_thread_mutex);
+	// DEBUG END
+
 
 	/* Join all worker threads. */
 	for (unsigned int i = 0; i < tp->num_threads; i++)
@@ -150,9 +182,11 @@ os_threadpool_t *create_threadpool(unsigned int num_threads)
 	pthread_mutex_init(&tp->queue_mutex, NULL);
 	pthread_mutex_init(&tp->blocked_thread_mutex, NULL);
 	pthread_cond_init(&tp->waiting_cond, NULL);
-	pthread_cond_init(&tp->empty_queue_cond, NULL);
+	pthread_cond_init(&tp->check_finish_cond, NULL);
 
-	tp->state = IN_PROGRESS;
+	pthread_mutex_init(&tp->enum_mutex, NULL);
+
+	tp->state = INITIALIZED;
 	tp->blocked_thread_cnt = 0;
 
 	tp->num_threads = num_threads;
@@ -175,7 +209,9 @@ void destroy_threadpool(os_threadpool_t *tp)
 	pthread_mutex_destroy(&tp->queue_mutex);
 	pthread_mutex_destroy(&tp->blocked_thread_mutex);
 	pthread_cond_destroy(&tp->waiting_cond);
-	pthread_cond_destroy(&tp->empty_queue_cond);
+	pthread_cond_destroy(&tp->check_finish_cond);
+
+	pthread_mutex_destroy(&tp->enum_mutex);
 
 	list_for_each_safe(n, p, &tp->head) {
 		list_del(n);

@@ -28,16 +28,19 @@ typedef struct os_threadpool {
 
 	/* TODO: Define threapool / queue synchronization data. */
 	enum {
-		IN_PROGRESS = 0,
-		FINISHED = 1
+		INITIALIZED = 0,
+		IN_PROGRESS = 1,
+		FINISHED = 2
 	} state;
 
 	int blocked_thread_cnt;
 
-	pthread_mutex_t queue_mutex;
-	pthread_mutex_t blocked_thread_mutex;
-	pthread_cond_t waiting_cond;
-	pthread_cond_t empty_queue_cond;
+	pthread_mutex_t queue_mutex;			// for accessing queue members
+	pthread_mutex_t blocked_thread_mutex;	// for accessing blocked_thread_cnt
+	pthread_cond_t waiting_cond;			// cond for threads to wait
+	pthread_cond_t check_finish_cond;		// cond for main thread to change state to FINISHED
+
+	pthread_mutex_t enum_mutex;
 
 } os_threadpool_t;
 
