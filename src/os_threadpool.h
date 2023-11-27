@@ -27,6 +27,18 @@ typedef struct os_threadpool {
 	os_list_node_t head;
 
 	/* TODO: Define threapool / queue synchronization data. */
+	enum {
+		IN_PROGRESS = 0,
+		FINISHED = 1
+	} state;
+
+	int blocked_thread_cnt;
+
+	pthread_mutex_t queue_mutex;
+	pthread_mutex_t blocked_thread_mutex;
+	pthread_cond_t waiting_cond;
+	pthread_cond_t empty_queue_cond;
+
 } os_threadpool_t;
 
 os_task_t *create_task(void (*f)(void *), void *arg, void (*destroy_arg)(void *));
