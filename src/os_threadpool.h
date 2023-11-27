@@ -35,12 +35,8 @@ typedef struct os_threadpool {
 
 	int blocked_thread_cnt;
 
-	// pthread_mutex_t queue_mutex;			// for accessing queue members
-	// pthread_mutex_t blocked_thread_mutex;	// for accessing blocked_thread_cnt
 	pthread_cond_t waiting_cond;			// cond for threads to wait
 	pthread_cond_t check_finish_cond;		// cond for main thread to change state to FINISHED
-
-	// pthread_mutex_t enum_mutex;
 
 	pthread_mutex_t mutex_tp;
 

@@ -42,7 +42,9 @@ void enqueue_task(os_threadpool_t *tp, os_task_t *t)
 	pthread_mutex_lock(&tp->mutex_tp);
 
 	list_add(&tp->head, &t->list);
-	tp->state = IN_PROGRESS;
+
+	if (tp->state == INITIALIZED)
+		tp->state = IN_PROGRESS;
 
 	pthread_cond_signal(&tp->waiting_cond);
 	pthread_mutex_unlock(&tp->mutex_tp);
@@ -131,7 +133,7 @@ void wait_for_completion(os_threadpool_t *tp)
 
 
 	// DEBUG START
-	//printf("Cnt block after finish is (%d)\n", tp->blocked_thread_cnt);
+	// printf("Cnt block after finish is (%d)\n", tp->blocked_thread_cnt);
 	// DEBUG END
 	pthread_mutex_unlock(&tp->mutex_tp);
 
