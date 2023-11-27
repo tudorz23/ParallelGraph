@@ -122,18 +122,20 @@ void wait_for_completion(os_threadpool_t *tp)
 {
 	/* TODO: Wait for all worker threads. Use synchronization. */
 	pthread_mutex_lock(&tp->mutex_tp);
-	while (tp->blocked_thread_cnt < tp->num_threads || tp->state == INITIALIZED) {
+	while ((tp->state == INITIALIZED || !queue_is_empty(tp))
+			|| tp->blocked_thread_cnt < tp->num_threads) {
 		//printf("BLock thread cnt is (%d)\n", tp->blocked_thread_cnt);
 		pthread_cond_wait(&tp->check_finish_cond, &tp->mutex_tp);
 	}
 
+	//printf("State is (%d)\n", tp->state);
 
 	tp->state = FINISHED;
 	pthread_cond_broadcast(&tp->waiting_cond);
 
 
 	// DEBUG START
-	// printf("Cnt block after finish is (%d)\n", tp->blocked_thread_cnt);
+	//printf("Cnt block after finish is (%d)\n", tp->blocked_thread_cnt);
 	// DEBUG END
 	pthread_mutex_unlock(&tp->mutex_tp);
 

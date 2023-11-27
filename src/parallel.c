@@ -19,10 +19,10 @@ static os_threadpool_t *tp;
 
 
 /* TODO: Define graph synchronization mechanisms. */
-pthread_mutex_t sum_mutex;
-pthread_mutex_t check_node_mutex;
+// pthread_mutex_t sum_mutex;
+// pthread_mutex_t check_node_mutex;
 
-
+pthread_mutex_t graph_mutex;
 
 /* TODO: Define graph task argument. */
 typedef struct graph_task_arg {
@@ -45,35 +45,32 @@ void process_task(void *arg) {
 
 	os_node_t *node = graph->nodes[graph_arg->idx];
 
-	pthread_mutex_lock(&check_node_mutex);
+	pthread_mutex_lock(&graph_mutex);
 	if (graph->visited[graph_arg->idx] != NOT_VISITED) {
-		pthread_mutex_unlock(&check_node_mutex);
+		pthread_mutex_unlock(&graph_mutex);
 		return;
 	}
 
 	graph->visited[graph_arg->idx] = PROCESSING;
 
-	pthread_mutex_unlock(&check_node_mutex);
 
-
-	pthread_mutex_lock(&sum_mutex);
 	sum += node->info;
-	printf("Current sum is (%d)\n", sum);
-	pthread_mutex_unlock(&sum_mutex);
+	//printf("Current sum is (%d)\n", sum);
+	pthread_mutex_unlock(&graph_mutex);
 
 	for (int i = 0; i < node->num_neighbours; i++) {
-		pthread_mutex_lock(&check_node_mutex);
+		pthread_mutex_lock(&graph_mutex);
 
 		if (graph->visited[node->neighbours[i]] == NOT_VISITED) {
 			process_node(node->neighbours[i]);
 		}
 
-		pthread_mutex_unlock(&check_node_mutex);
+		pthread_mutex_unlock(&graph_mutex);
 	}
 
-	pthread_mutex_lock(&check_node_mutex);
+	pthread_mutex_lock(&graph_mutex);
 	graph->visited[graph_arg->idx] = DONE;
-	pthread_mutex_unlock(&check_node_mutex);
+	pthread_mutex_unlock(&graph_mutex);
 }
 
 static void process_node(unsigned int idx)
@@ -105,18 +102,16 @@ int main(int argc, char *argv[])
 	graph = create_graph_from_file(input_file);
 
 	/* TODO: Initialize graph synchronization mechanisms. */
-	pthread_mutex_init(&sum_mutex, NULL);
-	pthread_mutex_init(&check_node_mutex, NULL);
+	pthread_mutex_init(&graph_mutex, NULL);
 
 	tp = create_threadpool(NUM_THREADS);
 	process_node(0);
 	wait_for_completion(tp);
 	destroy_threadpool(tp);
 
-	pthread_mutex_destroy(&sum_mutex);
-	pthread_mutex_destroy(&check_node_mutex);
+	pthread_mutex_destroy(&graph_mutex);
 
-	printf("%d\n", sum);
+	printf("%d", sum);
 
 	return 0;
 }
