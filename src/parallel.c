@@ -17,30 +17,27 @@ static int sum;
 static os_graph_t *graph;
 static os_threadpool_t *tp;
 
-
-/* TODO: Define graph synchronization mechanisms. */
-// pthread_mutex_t sum_mutex;
-// pthread_mutex_t check_node_mutex;
-
 pthread_mutex_t graph_mutex;
 
-/* TODO: Define graph task argument. */
 typedef struct graph_task_arg {
 	unsigned int idx;
 } graph_task_arg_t;
 
 static void process_node(unsigned int idx);
 
-
-
-static void destroy_graph_task_arg(void *arg) {
+static void destroy_graph_task_arg(void *arg)
+{
 	graph_task_arg_t *graph_arg = (graph_task_arg_t *)arg;
 	free(graph_arg);
 }
 
-
-
-void process_task(void *arg) {
+/**
+ * Helper for process_node() function.
+ * Does the actual processing of the node and of its neighbours.
+ * To be added as task in the task queue.
+ */
+void process_task(void *arg)
+{
 	graph_task_arg_t *graph_arg = (graph_task_arg_t *)arg;
 
 	os_node_t *node = graph->nodes[graph_arg->idx];
@@ -53,12 +50,10 @@ void process_task(void *arg) {
 
 	graph->visited[graph_arg->idx] = PROCESSING;
 
-
 	sum += node->info;
-	//printf("Current sum is (%d)\n", sum);
 	pthread_mutex_unlock(&graph_mutex);
 
-	for (int i = 0; i < node->num_neighbours; i++) {
+	for (unsigned int i = 0; i < node->num_neighbours; i++) {
 		pthread_mutex_lock(&graph_mutex);
 
 		if (graph->visited[node->neighbours[i]] == NOT_VISITED) {
@@ -73,9 +68,12 @@ void process_task(void *arg) {
 	pthread_mutex_unlock(&graph_mutex);
 }
 
+/**
+ * Creates a task for processing the node with the index idx.
+ * Uses the helper process_task().
+ */
 static void process_node(unsigned int idx)
 {
-	/* TODO: Implement thread-pool based processing of graph. */
 	graph_task_arg_t *graph_arg = malloc(sizeof(graph_task_arg_t));
 	DIE(!graph_arg, "malloc");
 
@@ -101,7 +99,6 @@ int main(int argc, char *argv[])
 
 	graph = create_graph_from_file(input_file);
 
-	/* TODO: Initialize graph synchronization mechanisms. */
 	pthread_mutex_init(&graph_mutex, NULL);
 
 	tp = create_threadpool(NUM_THREADS);
