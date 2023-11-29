@@ -28,6 +28,7 @@ static void process_node(unsigned int idx);
 static void destroy_graph_task_arg(void *arg)
 {
 	graph_task_arg_t *graph_arg = (graph_task_arg_t *)arg;
+
 	free(graph_arg);
 }
 
@@ -56,9 +57,8 @@ void process_task(void *arg)
 	for (unsigned int i = 0; i < node->num_neighbours; i++) {
 		pthread_mutex_lock(&graph_mutex);
 
-		if (graph->visited[node->neighbours[i]] == NOT_VISITED) {
+		if (graph->visited[node->neighbours[i]] == NOT_VISITED)
 			process_node(node->neighbours[i]);
-		}
 
 		pthread_mutex_unlock(&graph_mutex);
 	}
@@ -75,6 +75,7 @@ void process_task(void *arg)
 static void process_node(unsigned int idx)
 {
 	graph_task_arg_t *graph_arg = malloc(sizeof(graph_task_arg_t));
+
 	DIE(!graph_arg, "malloc");
 
 	graph_arg->idx = idx;
